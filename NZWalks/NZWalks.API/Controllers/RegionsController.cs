@@ -9,6 +9,8 @@ using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTOs;
 using NZWalks.API.Repositories;
+using System.Net;
+using System.Text.Json;
 
 namespace NZWalks.API.Controllers
 {
@@ -21,56 +23,76 @@ namespace NZWalks.API.Controllers
         private readonly NZWalksDBContext dBContext;
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<RegionsController> logger;
 
         public RegionsController(NZWalksDBContext dBContext, IRegionRepository regionRepository
-            ,IMapper mapper)
+            ,IMapper mapper, ILogger<RegionsController> logger)
         {
             this.dBContext = dBContext;
             this.regionRepository = regionRepository;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         //Get:https://localhost:portnumber/api/regions
         [HttpGet]
-        [Authorize(Roles ="Reader")]
+        //[Authorize(Roles ="Reader")]
         public async Task<IActionResult> GetAll()
         {
-            var regionsDomain = await regionRepository.GetAllAsync();
-            // var regions = await dBContext.Regions.ToListAsync();
+            //logger.LogInformation("GetAll action method was invoked");
+            //logger.LogWarning("Warning");
+            //logger.LogError("Error");
 
-            //Mapping DM to DTO
-            //var regionDTO = new List<RegionDTO>();
-            //foreach (var region in regionsDomain)
+            //try
             //{
-            //    regionDTO.Add(new RegionDTO()
-            //    {
-            //        Id = region.Id,
-            //        Code = region.Code,
-            //        Name = region.Name,
-            //        RegionImageURL = region.RegionImageURL
-            //    });
+            //    throw new Exception("Test Exception");
+                var regionsDomain = await regionRepository.GetAllAsync();
+                // var regions = await dBContext.Regions.ToListAsync();
+
+                //Mapping DM to DTO
+                //var regionDTO = new List<RegionDTO>();
+                //foreach (var region in regionsDomain)
+                //{
+                //    regionDTO.Add(new RegionDTO()
+                //    {
+                //        Id = region.Id,
+                //        Code = region.Code,
+                //        Name = region.Name,
+                //        RegionImageURL = region.RegionImageURL
+                //    });
+                //}
+                logger.LogInformation($"Finished GetAll Regions Request with data: {JsonSerializer.Serialize(regionsDomain)}");
+
+                var regionDTO = mapper.Map<List<RegionDTO>>(regionsDomain);
+
+
+                return Ok(regionDTO);
+        //}
+            //catch(Exception ex)
+            //{
+            //    logger.LogError(ex, ex.Message);
+            //    return Problem("Something went wrong", null, (int)HttpStatusCode.InternalServerError);
+            //    throw;
             //}
-            var regionDTO=mapper.Map<List<RegionDTO>>(regionsDomain);
 
-            return Ok(regionDTO);
-            //{
-            //    new Region
-            //    {
-            //        Id=Guid.NewGuid(),
-            //        Name="Auckland Region",
-            //        Code="Akl",
-            //        RegionImageURL="Dummy.png"
-            //    },
-            //    new Region
-            //    {
-            //        Id=Guid.NewGuid(),
-            //        Name="Wellington Region",
-            //        Code="Akl",
-            //        RegionImageURL="Dummy.png"
-            //    }
-            //};
-            //return Ok(regions);
-        }
+    //{
+    //    new Region
+    //    {
+    //        Id=Guid.NewGuid(),
+    //        Name="Auckland Region",
+    //        Code="Akl",
+    //        RegionImageURL="Dummy.png"
+    //    },
+    //    new Region
+    //    {
+    //        Id=Guid.NewGuid(),
+    //        Name="Wellington Region",
+    //        Code="Akl",
+    //        RegionImageURL="Dummy.png"
+    //    }
+    //};
+    //return Ok(regions);
+}
 
         //Get Single Region(Get Region by Id)
         //Get:
